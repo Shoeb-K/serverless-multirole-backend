@@ -48,8 +48,4 @@ serverless-multirole-backend/
 - **Input Validation & Hashing:** Passwords are secure hashed using SHA-256. (Note: Can be swapped for bcrypt but avoids Lambda C-bindings for this demo).
 - **Graceful Error Handling:** Dedicated `utils.responses` logic ensuring standard structured JSON returns in all conditions.
 - **Microservice Structure:** Code heavily decoupled.
-# serverless-multirole-backend
-# serverless-multirole-backend
-# serverless-multirole-backend
-# serverless-multirole-backend
-# serverless-multirole-backend
+
