@@ -8,16 +8,28 @@ It showcases how to design and implement a cloud-native backend using AWS servic
 
 ---
 
+## 🚀 Real-World Relevance
+
+This project is inspired by a production system where:
+
+- Multi-role access (Admin, Supervisor, User) was implemented
+- Real-time notifications were delivered using event-driven architecture
+- System handled asynchronous workflows using SQS
+
+This repository demonstrates the core architecture and concepts in a simplified form.
+
+---
+
 ## 🏗️ Architecture Overview
 
 The system follows a **serverless and event-driven architecture**:
 
-- API Gateway – Entry point for client requests
-- AWS Lambda – Backend business logic
-- DynamoDB – Scalable NoSQL database
-- SQS – Asynchronous event processing
-- Step Functions – Workflow orchestration (optional)
-- CloudWatch – Logging and monitoring
+- **API Gateway** – Entry point for client requests
+- **AWS Lambda** – Backend business logic
+- **DynamoDB** – Scalable NoSQL database
+- **SQS** – Asynchronous event processing
+- **AWS CDK** – Infrastructure as Code modeling
+- **CloudWatch** – Logging and monitoring
 
 ![Architecture](./assets/architecture.png)
 
@@ -40,14 +52,14 @@ The system follows a **serverless and event-driven architecture**:
 ## ⚙️ Tech Stack
 
 - **Backend:** Python (AWS Lambda)
+- **Infrastructure as Code:** AWS CDK (Python)
 - **Cloud Services:**
   - AWS Lambda
   - API Gateway
   - DynamoDB
   - SQS
   - CloudWatch
-- **Libraries:** Boto3, Pandas
-- **DevOps:** GitHub Actions, Jenkins (extendable)
+- **Libraries:** PyJWT, Boto3
 
 ---
 
@@ -61,7 +73,7 @@ The system follows a **serverless and event-driven architecture**:
 ### 🔑 Authentication & Authorization
 
 - User registration and login APIs
-- Token-based authentication (JWT-ready structure)
+- Token-based authentication (JWT) with password hashing
 
 ![Auth Flow](./assets/auth-flow.png)
 
@@ -79,6 +91,34 @@ The system follows a **serverless and event-driven architecture**:
 
 - CloudWatch logging integration
 - Structured logs for debugging and observability
+
+---
+
+## 🌍 Deployment
+
+This system is designed to be deployed on AWS using **AWS CDK**.
+
+- API Gateway endpoint exposed securely
+- Lambda functions deployed automatically from `src/`
+- SQS configured for async processing
+- DynamoDB tables mapped seamlessly
+
+---
+
+## 🧠 Design Decisions
+
+- **Used SQS for decoupling and scalability:** Offloads background processing (like notifications) from the core API latency path.
+- **Serverless architecture to reduce operational overhead:** Eliminates server patching and scales infinitely on demand.
+- **DynamoDB for high scalability and low latency:** Provides single-digit millisecond performance for user state and fast querying.
+- **Infrastructure as Code (AWS CDK over SAM/YAML):** Allows defining cloud resources using familiar Python object-oriented paradigms, making the infrastructure highly modular and reusable.
+
+---
+
+## ⚠️ Error Handling
+
+- **Input validation in APIs:** Bad requests are rejected before complex processing.
+- **Retry logic for SQS processing:** Built-in safeguards for failed asynchronous events.
+- **Graceful failure handling in Lambda:** Standardized JSON error response schemas utilizing a core `responses.py` utility.
 
 ---
 
@@ -115,34 +155,45 @@ The system follows a **serverless and event-driven architecture**:
 
 **GET /users**
 
-- Requires admin authorization
+- Requires admin authorization (JWT Bearer Token)
+
+---
+
+## 📊 Sample Logs (CloudWatch)
+
+```text
+[INFO] 2026-03-30T10:15:22Z User register request received for user@example.com
+[INFO] 2026-03-30T10:15:23Z User user@example.com registered successfully in DynamoDB
+[INFO] 2026-03-30T10:15:23Z Event pushed to SQS (MessageId: 8b7d-4f81-9b2f)
+[INFO] 2026-03-30T10:15:24Z SQS Consumer triggered for MessageId: 8b7d-4f81-9b2f
+[INFO] 2026-03-30T10:15:25Z Notification triggered successfully
+```
 
 ---
 
 ## 📁 Project Structure
 
-```
+```text
 serverless-multirole-backend/
 │
-├── src/
-│   ├── auth/
-│   │   ├── register.py
-│   │   └── login.py
-│   │
-│   ├── users/
-│   │   └── get_users.py
-│   │
-│   ├── events/
-│   │   ├── producer.py
-│   │   └── consumer.py
-│   │
-│   └── utils/
-│       ├── db.py
-│       └── auth.py
+├── infrastructure/               # IaC Definitions
+│   └── backend_stack.py          # AWS CDK Stack
 │
-├── template.yaml
-├── requirements.txt
-├── README.md
+├── src/                          # Lambda Microservices
+│   ├── register_user/app.py
+│   ├── login_user/app.py
+│   ├── get_users/app.py
+│   ├── process_event/app.py      # SQS Consumer 
+│   │
+│   └── utils/                    # Shared Libraries
+│       ├── db.py
+│       ├── auth.py
+│       └── responses.py
+│
+├── app.py                        # CDK App Entrypoint
+├── cdk.json                      # CDK Config
+├── requirements.txt              # Project Deps
+└── README.md
 ```
 
 ---
@@ -152,24 +203,19 @@ serverless-multirole-backend/
 ### Prerequisites
 
 - AWS CLI configured
-- AWS SAM CLI installed
+- Node.js & AWS CDK CLI installed (`npm install -g aws-cdk`)
 - Python 3.x
-
----
-
-### Run Locally
-
-```bash
-sam build
-sam local start-api
-```
 
 ---
 
 ### Deploy to AWS
 
 ```bash
-sam deploy --guided
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Deploy infrastructure
+cdk deploy
 ```
 
 ---
@@ -178,17 +224,16 @@ sam deploy --guided
 
 - IAM roles with least-privilege access
 - Input validation and error handling
-- Role-based access control
+- Role-based access control within Lambda execution layers
 
 ---
 
 ## 📈 Future Improvements
 
-- Add API rate limiting
+- Add API rate limiting via API Gateway Usage Plans
 - Implement caching (Redis / DAX)
-- Integrate Firebase Cloud Messaging (FCM)
+- Integrate automated Dead Letter Queue (DLQ) alarms
 - Add distributed tracing (AWS X-Ray)
-- Improve CI/CD automation
 
 ---
 
