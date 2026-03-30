@@ -92,6 +92,20 @@ The system follows a **serverless and event-driven architecture**:
 - CloudWatch logging integration
 - Structured logs for debugging and observability
 
+### 🏗️ Structured Codebase
+
+- Built-in validation layer
+- Reusable utilities (`src/utils`)
+- Structured, decoupled microservices
+
+---
+
+## 📈 Scalability
+
+- Serverless architecture auto-scales with demand
+- SQS decouples system components
+- DynamoDB supports high throughput workloads
+
 ---
 
 ## 🌍 Deployment
