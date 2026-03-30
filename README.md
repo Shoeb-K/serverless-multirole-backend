@@ -102,8 +102,8 @@ The system follows a **serverless and event-driven architecture**:
 
 ## 📈 Scalability
 
-- AWS Lambda auto-scales with incoming requests  
-- SQS enables horizontal scaling of consumers  
+- Serverless architecture auto-scales with demand
+- SQS decouples system components
 - DynamoDB supports high throughput workloads
 
 ---
@@ -121,18 +121,18 @@ This system is designed to be deployed on AWS using **AWS CDK**.
 
 ## 🧠 Design Decisions
 
-- Serverless architecture to reduce infrastructure overhead  
-- SQS used to decouple services and handle async workflows  
-- DynamoDB chosen for scalability and low latency
+- **Used SQS for decoupling and scalability:** Offloads background processing (like notifications) from the core API latency path.
+- **Serverless architecture to reduce operational overhead:** Eliminates server patching and scales infinitely on demand.
+- **DynamoDB for high scalability and low latency:** Provides single-digit millisecond performance for user state and fast querying.
+- **Infrastructure as Code (AWS CDK over SAM/YAML):** Allows defining cloud resources using familiar Python object-oriented paradigms, making the infrastructure highly modular and reusable.
 
 ---
 
-## ⚠️ Reliability & Failure Handling
+## ⚠️ Error Handling
 
-- SQS ensures message durability  
-- Failed messages can be retried  
-- Logs captured for debugging  
-- System designed to handle async failures gracefully
+- **Input validation in APIs:** Bad requests are rejected before complex processing.
+- **Retry logic for SQS processing:** Built-in safeguards for failed asynchronous events.
+- **Graceful failure handling in Lambda:** Standardized JSON error response schemas utilizing a core `responses.py` utility.
 
 ---
 
@@ -173,21 +173,14 @@ This system is designed to be deployed on AWS using **AWS CDK**.
 
 ---
 
-## 📊 Sample Execution
+## 📊 Sample Logs (CloudWatch)
 
-### API Response
-```json
-{
-  "message": "User registered successfully"
-}
-```
-
-### CloudWatch Logs
 ```text
-[INFO] Request received  
-[INFO] User stored in DynamoDB  
-[INFO] Event pushed to SQS  
-[INFO] Notification sent  
+[INFO] 2026-03-30T10:15:22Z User register request received for user@example.com
+[INFO] 2026-03-30T10:15:23Z User user@example.com registered successfully in DynamoDB
+[INFO] 2026-03-30T10:15:23Z Event pushed to SQS (MessageId: 8b7d-4f81-9b2f)
+[INFO] 2026-03-30T10:15:24Z SQS Consumer triggered for MessageId: 8b7d-4f81-9b2f
+[INFO] 2026-03-30T10:15:25Z Notification triggered successfully
 ```
 
 ---
